@@ -6,9 +6,11 @@
             "command": "/usr/bin/g++",
             "args": [
                 "-g",
-                "-std=c++11",
+                "-std=c++17",
                 "${workspaceFolder}/src/main.cpp",
-                "${workspaceFolder}/src/image.cpp",
+                "${workspaceFolder}/src/bmp_image.cpp",
+                "${workspaceFolder}/src/perlin_noise.cpp",
+                "${workspaceFolder}/src/color_maps.cpp",
                 "-o",
                 "${workspaceFolder}/main"
             ],

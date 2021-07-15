@@ -1,34 +1,47 @@
-# include "image.h"
+# include "bmp_image.h"
+#include "perlin_noise.h"
 
 #include <iostream>
+#include <cmath>
 #include <chrono>
 
 using namespace std;
 
 int main() {
 
-    const int width = 200;
-    const int height = 200;
+    // Just testing
+
+    const int width = 1920;
+    const int height = 1080;
 
     // Time meassurement
     auto start = chrono::high_resolution_clock::now();
 
-    BMPImage img(2, width, height);
+    BMPImage img(1, width, height);
 
     
-    img.drawRect(
-        {1.0, 0, 0 , 1.0},
-        0, 100, 100, 10, 10
-    );
-    
+    PerlinNoise pn(100);
+    float n;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            //n = pn.detailedNoise(5, (double)x/(double)width, (double)y/(double)height);
+            //n = pn.detailedNoise(5, (double)x/(double)width + 2*n, (double)y/(double)height + 2*n);
+            n = pn.noise((double)x/(double)width, (double)y/(double)height, 0.8);
+            n = pn.setRange(n);
+            n = pn.woodNoise(10, n);
+            
+
+            img.setPixel(0, x, y, {n, n, n, 1.0f});
+        }
+    }
+
+    //img.blurlayer(0, 10);
 
     img.exportToFile("../images/test.bmp");
 
 
     auto stop = chrono::high_resolution_clock::now();
-    cout << "Time: ";
-    cout << chrono::duration_cast<chrono::microseconds>(stop-start).count() << endl;
-
+    cout << "Time: " << chrono::duration_cast<chrono::milliseconds>(stop-start).count() << "ms" << endl; 
 
     return 1;
 }

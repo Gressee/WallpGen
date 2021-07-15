@@ -1,0 +1,29 @@
+
+
+------------------------------------------------------------
+Color Map functions so a input of range [0,1] returns
+a color 
+For Wood like noise functions it should be 
+that for inputs at 0 and 1 the color should be the same so 
+the borders at wood noise srent as pixely
+------------------------------------------------------------
+
+------------------------------------------------------------
+Noise Ideas
+    0. Warped input a noise value into another noise function
+        as an addition to the x y vars
+        Can be aplied to all below (I think 
+        it coul look nice)
+
+    1. Inverse: n = 1 - abs(n)  n in range [-1, 1]
+    2. Wood n *= 20; n = n - floor(n)
+    2. Overflow if range is not corrected before writeing
+        to image
+        "artificial way": (room for optimasion I think)
+        if (n > 0) {
+                n = (n + 1.0)/2.0;
+            } else {
+                n = 0.5 - (n + 1.0)/2.0;
+            }
+
+------------------------------------------------------------
