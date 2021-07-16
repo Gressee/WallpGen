@@ -268,9 +268,9 @@ void BMPImage::exportToFile(const char * path) const {
             Pixel p = getAlphaCompositionPixel(x, y);
 
             // Convert to bmp range
-            unsigned char r = static_cast<unsigned char>(p.r * 255.0f);
-            unsigned char g = static_cast<unsigned char>(p.g * 255.0f);
-            unsigned char b = static_cast<unsigned char>(p.b * 255.0f);
+            unsigned char r = static_cast<unsigned char>(p.r * 255.0);
+            unsigned char g = static_cast<unsigned char>(p.g * 255.0);
+            unsigned char b = static_cast<unsigned char>(p.b * 255.0);
             
             unsigned char color[] = {b, g, r};  // This has to be g r b  per bmp definition
 

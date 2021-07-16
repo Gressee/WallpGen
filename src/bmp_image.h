@@ -15,10 +15,10 @@ using namespace std;
 // strcut that stores th rgb values of a pixel
 // The range of rgb is 0.0 - 1.0
 struct Pixel {
-    float r;
-    float g; 
-    float b;
-    float a;
+    double r;
+    double g; 
+    double b;
+    double a;
 };
 
 class BMPImage {

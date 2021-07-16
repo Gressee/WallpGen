@@ -1,7 +1,7 @@
 
 
 ------------------------------------------------------------
-Color Map functions so a input of range [0,1] returns
+Color Map functions so a input of range [-1,1] returns
 a color 
 For Wood like noise functions it should be 
 that for inputs at 0 and 1 the color should be the same so 
