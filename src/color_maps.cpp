@@ -25,25 +25,26 @@ void colorMapSmoothEnds(
     // as colors or if its always 1
 
     // Set only the colors
-    double r, g, b;
+    double r, g, b, a, n;
     for (int y = 0; y < img.height; y++) {
-        for (int x = x; x < img.width; x++) {
+        for (int x = 0; x < img.width; x++) {
+            // This uses the red value but it doesnt really matter
+            // bc the image should be black and white
+            n = img.getPixel(layer, x, y).r;
+         
+            r = amp_r * pow(2.0, - sharpness_r * pow(n-0.5, 2));
+            g = amp_g * pow(2.0, - sharpness_g * pow(n-0.5, 2));
+            b = amp_b * pow(2.0, - sharpness_b * pow(n-0.5, 2));
 
+            // If statement could maybe only called once but idk now
+            if (constAlpha == true) {
+                a = 1.0;
+            } else {
+                a = amp_a * pow(2.0, - sharpness_a * pow(n-0.5, 2));
+            }
+
+            // Set the new pixel color
+            img.setPixel(layer, x, y, {r, g, b, a});
         }
-    }
-
-    // Set the alpha (is seperated so if is only executed once)
-    float a;
-    if (constAlpha == true) {
-        a = 1.0;
-    } else {
-
-    }
-
-    /*
-    float r = (float)(amp_r * pow(2.0, - sharpness_r * pow(noise-0.5, 2)));
-    float g = (float)(amp_g * pow(2.0, - sharpness_g * pow(noise-0.5, 2)));
-    float b = (float)(amp_b * pow(2.0, - sharpness_b * pow(noise-0.5, 2)));
-    */
-    
+    }    
 }

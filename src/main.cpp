@@ -38,8 +38,10 @@ int main() {
         }
     }
 
-    //img.blurlayer(0, 10);
+    colorMapSmoothEnds(img, 0, true, 40.0, 40.0, 40.0, 40.0, 0.3, 0.1, 1.0, 1.0);
 
+    //img.blurlayer(0, 10);
+    
     img.exportToFile("../images/test.bmp");
 
 
