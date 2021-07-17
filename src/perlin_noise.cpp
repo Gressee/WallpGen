@@ -3,6 +3,8 @@
 
 
 #include "perlin_noise.h"
+#include "bmp_image.h"
+
 #include <cmath>
 #include <random>
 #include <algorithm>
@@ -97,39 +99,134 @@ double PerlinNoise::noise(double x, double y, double z) {
     return res;
 }
 
-// Get a noise with details
-double PerlinNoise::detailedNoise(int detailLevels, double x, double y) {
+// Sets a input in range [-1 ,1] to [0, 1]
+void PerlinNoise::correctLayerRange(BMPImage * img, int layer) {
+    Pixel p;
+    for (int y = 0; y < img->height; y++) {
+        for (int x = 0; x < img->width; x++) {
+            p = img->getPixel(layer, x, y);
+            p.r = (p.r + 1.0)/2.0;
+            p.g = (p.g + 1.0)/2.0;
+            p.b = (p.b + 1.0)/2.0;
+            p.a = (p.a + 1.0)/2.0;
 
-    // The z value from the "noise" function id by default 0.8
-    // bc i think this got the best results
-
-    // Get the first normal noise layer
-    double n = noise(x, y, 0.8);
-    
-    double factor = 2.0;
-    double amp = 0.85;
-    double total_amp = 1;
-    
-    for (int l = 0; l < detailLevels-1; l++) {
-        total_amp += amp;
-        n += amp * noise(factor * x, factor * y, 0.8);
-
-        factor *= 2.0;
-        amp *= 0.85;
+            img->setPixel(layer, x, y, p);
+        }
     }
 
-    // Bring back to range [-1,1]
-    n = n / total_amp;
+}
 
-    return n;
+
+// Create a new layer with detailed Noise (in BLACK & WHITE with ALPHA = 1)
+// detailLevel = 1 is the normal without detail
+void PerlinNoise::detailedNoiseLayer(BMPImage * img, int layer, int detailLevels, double baseFactor, double offset) {
+
+    // Basefactor is good in a range from 1-4
+
+    for (int y = 0; y < img->height; y++) {
+        for (int x = 0; x < img->width; x++) {
+
+            // The z value from the "noise" function id by default 0.0 
+            // but it is random so it can change
+
+            // Get the first normal noise layer
+            double n = noise(baseFactor * (double)x / (double)img->width + offset, baseFactor * (double)y / (double)img->height + offset, 0.0);
+            
+            double factor = 2.0;
+            double amp = 0.85;
+            double total_amp = 1;
+            
+            for (int l = 0; l < detailLevels-1; l++) {
+                total_amp += amp;
+                n += amp * noise(baseFactor * factor * (double)x / (double)img->width, baseFactor * factor * (double)y / (double)img->height, 0.8);
+
+                factor *= 2.0;
+                amp *= 0.85;
+            }
+
+            // Bring back to range [-1,1]
+            n = n / total_amp;
+
+            // Set the pixel of the image
+            img->setPixel(layer, x, y, {n, n, n, 1.0});
+
+        }
+    }
+}
+// This first created detailed noise whjich is used 
+// to create more detailed noise
+// offset is used in animation as the time 
+void PerlinNoise::warpedNoiseLayer(BMPImage * img, int layer, int detailLevels, double baseFactor, double offset) {
+
+    // Recomended: Low detailLevels (1-3); High baseFactor (5-10)
+
+    // Create a image that stores the noise that is used
+    // to warp the other noise 
+    BMPImage buffer_img(1, img->width, img->height);
+    detailedNoiseLayer(&buffer_img, 0, detailLevels, baseFactor, offset);
+
+    // This is the same code as in the detailed noise but with the
+    // warp amount included
+    for (int y = 0; y < img->height; y++) {
+        for (int x = 0; x < img->width; x++) {
+
+            // The z value from the "noise" function id by default 0.0 
+            // but it is random so it can change
+
+            // Get the first normal noise layer
+            double warp = buffer_img.getPixel(0, x, y).r;  // what color doesnt matter bc r=g=b=a
+            double noise_x = baseFactor * (double)x / (double)img->width + warp + offset;
+            double noise_y = baseFactor * (double)y / (double)img->height + warp + offset;
+            double n = noise(noise_x, noise_y, 0.0);
+            
+            double factor = 2.0;
+            double amp = 0.85;
+            double total_amp = 1;
+            
+            for (int l = 0; l < detailLevels-1; l++) {
+                total_amp += amp;
+
+                noise_x = baseFactor * factor * ((double)x / (double)img->width + warp + offset);
+                noise_y = baseFactor * factor * ((double)y / (double)img->height + warp + offset);
+                n += amp * noise(noise_x, noise_y, 0.8);
+
+                factor *= 2.0;
+                amp *= 0.85;
+            }
+
+            // Bring back to range [-1,1]
+            n = n / total_amp;
+
+            // Set the pixel of the image
+            img->setPixel(layer, x, y, {n, n, n, 1.0});
+
+        }
+    }
 }
 
 // Wood noise
-// This takes a noise value as input so every other noise
-// generation functions can be jused
-double PerlinNoise::woodNoise(int spacing, double noiseValue) {
-    noiseValue *= spacing;
-    noiseValue = noiseValue - floor(noiseValue);
+// Tranforms a layer of an image to a wood like structure
+// Alpaha gets transformed like a color
+void PerlinNoise::woodNoiseLayer(BMPImage * img, int layer, int spacing) {
+    
+    Pixel p;
+    for (int y = 0; y < img->height; y++) {
+        for (int x = 0; x < img->width; x++) {
+            p = img->getPixel(layer, x, y);
 
-    return noiseValue;
+            p.r *= spacing;
+            p.r = p.r - floor(p.r);
+
+            p.g *= spacing;
+            p.g = p.g - floor(p.g);
+
+            p.b *= spacing;
+            p.b = p.b - floor(p.b);
+
+            p.a *= spacing;
+            p.a = p.a - floor(p.a);
+
+            img->setPixel(layer, x, y, p);
+        }
+    }
 }

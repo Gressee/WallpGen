@@ -3,50 +3,94 @@
 #include "color_maps.h"
 
 #include <iostream>
+#include <string>
 #include <cmath>
 #include <chrono>
 
+
 using namespace std;
 
-int main() {
+void warpedNoiseAnimation(int width, int height, int frames, string folder, double speed) {
 
-    // Just testing
+    // Speed is the offset change per frame
+    // recomended: 0.001 - 0.006
+
+    // folder has to have a "/" at the end
+
+    cout << "Warped Noise Animation Started\n";
+
+    auto start = chrono::high_resolution_clock::now();
+
+    BMPImage img(1, width, height);
+    PerlinNoise pn(100);
+
+    double offset = 0.0;
+
+    string filepath;
+
+    for (int i = 0; i < frames; i++) {
+
+        auto frameStart = chrono::high_resolution_clock::now();
+        
+        pn.warpedNoiseLayer(&img, 0, 2, 10.0, offset);
+        pn.correctLayerRange(&img, 0);
+        colorMapLinear(&img, 0, 0.85, 0.23, 0.53, 0.04, 0.0, 0.0, 1.0, 1.0);
+
+        filepath = folder;
+        filepath.append("img");
+        filepath.append(to_string(i));
+        filepath.append(".bmp");
+
+        img.exportToFile(filepath);
+        
+        offset += speed;
+
+        auto frameStop = chrono::high_resolution_clock::now();
+        cout << "Frame Time: " << chrono::duration_cast<chrono::milliseconds>(frameStop-frameStart).count() << "ms" << endl; 
+    }
+
+    auto stop = chrono::high_resolution_clock::now();
+    cout << endl << "Animation Time: " << chrono::duration_cast<chrono::seconds>(stop-start).count() << "s" << endl; 
+} 
+
+void generateNoiseWallpaper(int seed, int width, int height, string folder) {
+    
+    PerlinNoise pn(10);
+
+    string filepath;
+
+    int i = 0;
+    while (true) {
+
+        BMPImage img(1, width, height);
+
+        filepath = folder;
+        filepath.append("img");
+        filepath.append(to_string(i));
+        filepath.append(".bmp");
+
+        img.exportToFile(filepath);
+
+        i++;
+
+        delete &img;
+        
+    }
+
+}
+
+int main() {
 
     const int width = 1920;
     const int height = 1080;
 
-    // Time meassurement
-    auto start = chrono::high_resolution_clock::now();
-
     BMPImage img(1, width, height);
+    PerlinNoise pn(10);
 
-    
-    PerlinNoise pn(100);
-    float n;
-    Pixel p;
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            //n = pn.detailedNoise(5, (double)x/(double)width, (double)y/(double)height);
-            //n = pn.detailedNoise(5, (double)x/(double)width + 2*n, (double)y/(double)height + 2*n);
-            n = pn.detailedNoise(4, (double)x/(double)width, (double)y/(double)height);
-            n = pn.detailedNoise(4, (double)x/(double)width + n, (double)y/(double)height + n);
-            n = pn.setRange(n);
-            n = pn.woodNoise(10, n);
-        
+    pn.warpedNoiseLayer(&img, 0, 2, 4.0, 0.0);
+    pn.correctLayerRange(&img, 0);
 
-            img.setPixel(0, x, y, {n,n,n,1.0f});
-        }
-    }
-
-    colorMapSmoothEnds(img, 0, true, 40.0, 40.0, 40.0, 40.0, 0.3, 0.1, 1.0, 1.0);
-
-    //img.blurlayer(0, 10);
-    
     img.exportToFile("../images/test.bmp");
-
-
-    auto stop = chrono::high_resolution_clock::now();
-    cout << "Time: " << chrono::duration_cast<chrono::milliseconds>(stop-start).count() << "ms" << endl; 
 
     return 1;
 }

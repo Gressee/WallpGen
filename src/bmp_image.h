@@ -6,6 +6,7 @@ https://www.youtube.com/watch?v=vqT5j38bWGg&t=1142s
 #pragma once
 
 #include <vector>
+#include <string>
 #include <cstdint>
 
 
@@ -61,7 +62,7 @@ public:
     void blurlayer(int layer, int blurRadius);
 
     // Export the image to a .bmp file
-    void exportToFile(const char * path) const;
+    void exportToFile(const string path) const;
 
 
     /* DRAW FUNCTIONS */

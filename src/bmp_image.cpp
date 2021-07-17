@@ -8,6 +8,7 @@ https://www.youtube.com/watch?v=vqT5j38bWGg&t=1142s
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <string>
 #include <fstream>
 
 
@@ -155,7 +156,7 @@ void BMPImage::blurlayer(int layer, int blurRadius) {
 }
 
 // Export the image as a bitmap file
-void BMPImage::exportToFile(const char * path) const {
+void BMPImage::exportToFile(const string path) const {
 
     
     // Open output file
@@ -283,7 +284,7 @@ void BMPImage::exportToFile(const char * path) const {
 
     f.close();
 
-    cout << "File created\n";
+    cout << "File " << path <<" created\n";
 
 }
 
@@ -298,7 +299,6 @@ void BMPImage::drawRect(Pixel color, int layer, int pos_x, int pos_y, int rect_w
 
     int y_min = clamp(pos_y, 0, height-1);
     int y_max = clamp(pos_y+rect_height, 0, height-1);
-
 
     for (int y = y_min; y < y_max; y++) {
         for (int x = x_min; x < x_max; x++) {
