@@ -11,6 +11,7 @@
                 "${workspaceFolder}/src/bmp_image.cpp",
                 "${workspaceFolder}/src/perlin_noise.cpp",
                 "${workspaceFolder}/src/color_maps.cpp",
+                "-lpthread",
                 "-o",
                 "${workspaceFolder}/main"
             ],

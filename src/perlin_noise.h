@@ -6,6 +6,7 @@
 #include "bmp_image.h"
 
 #include <vector>
+#include <string>
 
 class PerlinNoise {
 	
@@ -51,3 +52,8 @@ public:
 	// Returns in range [-1, 1]
 	double noise(double x, double y, double z);
 };
+
+// Functions to generate noise Wallpapers
+void generateNoiseWallpaper(int seed, int width, int height, string filepath, double offset);
+void generateNoiseWallpaperSequence (int seed, int width, int height, string folder);
+void noiseAnimation(int seed, int width, int height, int frames, string folder, double speed);
