@@ -1,1 +1,1 @@
-ffmpeg -r 24 -f image2 -s 1920x1080 -i images/animation/noise_animation_1533_%d.bmp -vcodec libx264 -crf 25  -pix_fmt yuv420p noise_animation_1533.mp4    
+ffmpeg -r 24 -f image2 -s 900x600 -i images/animation/noise_animation_2221_%d.bmp -vcodec libx264 -crf 25  -pix_fmt yuv420p noise_animation_2221.mp4    

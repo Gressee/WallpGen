@@ -56,4 +56,4 @@ public:
 // Functions to generate noise Wallpapers
 void generateNoiseWallpaper(int seed, int width, int height, string filepath, double offset);
 void generateNoiseWallpaperSequence (int seed, int width, int height, string folder);
-void noiseAnimation(int seed, int width, int height, int frames, string folder, double speed);
+void noiseAnimation(int seed, int width, int height, int startFrame, int endFrame, string folder, double speed);

@@ -5,14 +5,15 @@
 #include "perlin_noise.h"
 #include "bmp_image.h"
 #include "color_maps.h"
+#include "random_generator.h"
 
 #include <iostream>
 #include <thread>
 #include <chrono>
 #include <vector>
 #include <cmath>
-#include <random>
 #include <algorithm>
+#include <random>
 #include <numeric>
 
 using namespace std;
@@ -138,7 +139,7 @@ void PerlinNoise::detailedNoiseLayer(BMPImage * img, int layer, int detailLevels
             // but it is random so it can change
 
             // Get the first normal noise layer
-            double n = noise(baseFactor * (double)x / (double)img->width + offset, baseFactor * (double)y / (double)img->height + offset, 0.0);
+            double n = noise(baseFactor * (double)x / (double)img->width, baseFactor * (double)y / (double)img->height, 0.0);
             
             double factor = 2.0;
             double amp = 0.85;
@@ -146,7 +147,7 @@ void PerlinNoise::detailedNoiseLayer(BMPImage * img, int layer, int detailLevels
             
             for (int l = 0; l < detailLevels-1; l++) {
                 total_amp += amp;
-                n += amp * noise(baseFactor * factor * (double)x / (double)img->width, baseFactor * factor * (double)y / (double)img->height, 0.8);
+                n += amp * noise(baseFactor * factor * (double)x / (double)img->width + offset, baseFactor * factor * (double)y / (double)img->height + offset, 0.8);
 
                 factor *= 2.0;
                 amp *= 0.85;
@@ -161,6 +162,7 @@ void PerlinNoise::detailedNoiseLayer(BMPImage * img, int layer, int detailLevels
         }
     }
 }
+
 // This first created detailed noise whjich is used 
 // to create more detailed noise
 // offset is used in animation as the time 
@@ -248,94 +250,100 @@ void generateNoiseWallpaper(int seed, int width, int height, string filepath, do
     // The number in the save file is the seed of the image 
     // so it can be recreated
 
-    srand(seed);
-
     BMPImage * img = new BMPImage(1, width, height);
     PerlinNoise * pn = new PerlinNoise(seed);
+    
+    // My own random generator:
+    // Importatnt bc the "rand()" from a std lib (iirc)
+    // Has some trouble with reproducing results in 
+    // multythreading
+    RandomGenerator r = RandomGenerator(seed);
+
 
     // Noise type
     switch (seed % 2) {
         
         case 0:
-            // warped noise
+            
+            /* WARPED NOISE */
+            
             pn->warpedNoiseLayer(
                 img,
                 0,
                 seed % 3 + 1,
-                ((double)(seed % 600 + 200)) / 100.0,
+                ((double)(seed % 600 + 150)) / 100.0,
                 offset
             );
             pn->correctLayerRange(img, 0);
             colorMapLinear(
                 img, 
                 0,
-                ((double)(rand() % 100)) / 100.0,
-                ((double)(rand() % 100)) / 100.0,
-                ((double)(rand() % 100)) / 100.0,
-                ((double)(rand() % 100)) / 100.0,
-                ((double)(rand() % 100)) / 100.0,
-                ((double)(rand() % 100)) / 100.0,
-                ((double)(rand() % 100)) / 100.0,
-                ((double)(rand() % 100)) / 100.0
+                ((double)(r.rand() % 100)) / 100.0,
+                ((double)(r.rand() % 100)) / 100.0,
+                ((double)(r.rand() % 100)) / 100.0,
+                ((double)(r.rand() % 100)) / 100.0,
+                ((double)(r.rand() % 100)) / 100.0,
+                ((double)(r.rand() % 100)) / 100.0,
+                ((double)(r.rand() % 100)) / 100.0,
+                ((double)(r.rand() % 100)) / 100.0
             );
         break;
 
         case 1:
-            // Wood noise
-            pn->detailedNoiseLayer(
+            
+            /* WOOD NOISE */
+
+            pn->warpedNoiseLayer(
                 img,
                 0,
-                rand() % 2 + 1,
-                ((double)(rand() % 1000 + 400)) / 100.0,
+                r.rand() % 3 + 1,
+                (double)(r.rand() % 400 + 150) / 100.0,
                 offset
             );
             
             // Decide when correct range is called
-            if (rand() % 2 == 0) {
+            if (r.rand() % 2 == 0) {
                 pn->correctLayerRange(img, 0);
-                pn->woodNoiseLayer(img, 0, rand() % 10 + 2);
+                pn->woodNoiseLayer(img, 0, r.rand() % 7 + 2);
             } else {
-                pn->woodNoiseLayer(img, 0, rand() % 10 + 2);
+                pn->woodNoiseLayer(img, 0, r.rand() % 7 + 2);
                 pn->correctLayerRange(img, 0);
             }
             
             // What color map
-            if (rand() % 2 == 0) {
+            if (r.rand() % 2 == 0) {
                 colorMapLinear(   
                     img, 
                     0,
-                    ((double)(rand() % 100)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0
+                    ((double)(r.rand() % 100)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0
                 );
-                img->blurlayer(0, 5);
             } else {
                 colorMapSmoothEnds(
                     img,
                     0,
                     true,
-                    ((double)(rand() % 6000 + 150)) / 100.0,
-                    ((double)(rand() % 6000 + 150)) / 100.0,
-                    ((double)(rand() % 6000 + 150)) / 100.0,
-                    ((double)(rand() % 6000 + 150)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0,
-                    ((double)(rand() % 100)) / 100.0
+                    ((double)(r.rand() % 6000 + 150)) / 100.0,
+                    ((double)(r.rand() % 6000 + 150)) / 100.0,
+                    ((double)(r.rand() % 6000 + 150)) / 100.0,
+                    ((double)(r.rand() % 6000 + 150)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0,
+                    ((double)(r.rand() % 100)) / 100.0
                 );
             }
-            img->blurlayer(0, 4);
+            img->blurlayer(0, 5);
         break;
     }
 
     img->exportToFile(filepath);
-
-    //seed += seed % 20 + rand() % 50;
 
     delete img;
     delete pn;
@@ -352,85 +360,56 @@ void generateNoiseWallpaperSequence (int seed, int width, int height, string fol
     string filepath;
     vector<thread> threads;
 
+    RandomGenerator r = RandomGenerator(seed);
+
+    chrono::milliseconds sleepTime(10);
+
+
     while (true) {
         
         for (int i = 0; i < THREADS_NUM; i++) {
 
             filepath = folder;
             filepath.append("noise_img_");
-            filepath.append(to_string(seed));
+            filepath.append(to_string(seed+i));
             filepath.append(".bmp");
     
             threads.emplace_back([&](){generateNoiseWallpaper(seed+i, width, height, filepath, 0.0);});
+
+            // This waiting is IMPORTANT otherwise the "filepath" arg is not
+            // received correctly in the "generateNoiseWallpaper" function
+            this_thread::sleep_for(sleepTime);
         }
 
         for (auto & t: threads) {
             t.join();
         }
 
-        seed += seed % 20 + rand() % 50 + THREADS_NUM;
+        seed += seed % 20 + r.rand() % 50 + THREADS_NUM;
 
         threads.clear();
     }
 }
 
-void noiseAnimation(int seed, int width, int height, int frames, string folder, double speed) {
+void noiseAnimation(int seed, int width, int height, int startFrame, int endFrame, string folder, double speed) {
 
     // Speed is the offset change per frame
-    // recomended: 0.001 - 0.006
+    // Recomended: 0.001 - 0.006
 
     // folder has to have a "/" at the end
 
-    // For now only the SINGEL THREADED solutoion is working
-    
-    cout << "Noise Animation Started\n";
-
-    
-    auto start = chrono::high_resolution_clock::now();
-
-    double offset = 0.0;
-
-    string filepath;
-
-    for (int i = 0; i < frames; i++) {
-
-        auto frameStart = chrono::high_resolution_clock::now();
-
-        filepath = folder;
-        filepath.append("noise_animation_");
-        filepath.append(to_string(seed));
-        filepath.append("_");
-        filepath.append(to_string(i));
-        filepath.append(".bmp");
-
-        generateNoiseWallpaper(seed, width, height, filepath, offset);
-        
-        offset += speed;
-
-        auto frameStop = chrono::high_resolution_clock::now();
-        cout << "Frame Time: " << chrono::duration_cast<chrono::milliseconds>(frameStop-frameStart).count() << "ms" << endl; 
-    }
-
-    auto stop = chrono::high_resolution_clock::now();
-    cout << endl << "Animation Time: " << chrono::duration_cast<chrono::seconds>(stop-start).count() << "s" << endl; 
-
-    
-
-    // The following solution for multithreading
-    // is not working because the "rand()" function
-    // depends on how often it has been called before 
-    // So they dont reproduce the same result if
-    // generateNoiseWallpaper is ran in parallel
-
-    /* 
     string filepath = folder;
 
-    double baseOffset;
+    double offset = (double) startFrame * speed;
 
     vector<thread> threads;
 
-    for (int f = 1; f < frames; f += THREADS_NUM) {
+    chrono::milliseconds sleepTime(10);
+
+    for (int f = startFrame; f <= endFrame; f += THREADS_NUM) {
         
+        auto startTime = chrono::system_clock::now();
+
         for (int i = 0; i < THREADS_NUM; i++) {
 
             filepath = folder;
@@ -440,17 +419,27 @@ void noiseAnimation(int seed, int width, int height, int frames, string folder, 
             filepath.append(to_string(f+i));
             filepath.append(".bmp");
 
-            threads.emplace_back([&](){generateNoiseWallpaper(seed, width, height, filepath, baseOffset + i*speed);});
+            threads.emplace_back([&](){generateNoiseWallpaper(seed, width, height, filepath, offset);});
+
+            // This waiting is IMPORTANT otherwise the "filepath" arg is not
+            // received correctly in the "generateNoiseWallpaper" function
+            this_thread::sleep_for(sleepTime);
+
+            offset += speed;
+
         }
 
         for (auto & t: threads) {
             t.join();
         }
 
-        baseOffset += speed * THREADS_NUM;
-
         threads.clear();
+
+        auto endTime = chrono::system_clock::now();
+        chrono::duration<double> duration = endTime - startTime;
+        cout << endl << "Time for batch of " << THREADS_NUM << " frames: " << duration.count() << "s\n\n";
+
     }
-    */
+    
 } 
 

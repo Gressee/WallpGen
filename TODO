@@ -1,12 +1,5 @@
 
 
-------------------------------------------------------------
-Color Map functions so a input of range [-1,1] returns
-a color 
-For Wood like noise functions it should be 
-that for inputs at 0 and 1 the color should be the same so 
-the borders at wood noise srent as pixely
-------------------------------------------------------------
 
 ------------------------------------------------------------
 Noise Ideas
@@ -28,9 +21,3 @@ Noise Ideas
 
 ------------------------------------------------------------
 
-
-------------------------------------------------------------
-OPTIMASION:
-    1. In "colorMapSmoothEnds" the if statement could mybe
-        only executed once
-------------------------------------------------------------

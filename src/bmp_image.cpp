@@ -156,7 +156,7 @@ void BMPImage::blurlayer(int layer, int blurRadius) {
 }
 
 // Export the image as a bitmap file
-void BMPImage::exportToFile(const string path) const {
+void BMPImage::exportToFile(string path) const {
 
     
     // Open output file
