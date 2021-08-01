@@ -15,7 +15,7 @@ using namespace std;
 
 int main() {
 
-    //generateNoiseWallpaperSequence(1600, 4096, 2160, "../images/");
+    //genNoiseWallpSequence(1600, 4096, 2160, "../images/");
     noiseAnimation(2221, 4096, 2160, 0, 3000, "../images/animation/", 0.0010);
     
 

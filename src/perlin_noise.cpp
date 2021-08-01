@@ -244,7 +244,7 @@ void PerlinNoise::woodNoiseLayer(BMPImage * img, int layer, int spacing) {
 
 /* FUNCTIONS TO GENERATE WALLPAPERS */
 
-void generateNoiseWallpaper(int seed, int width, int height, string filepath, double offset) {
+void genNoiseWallp(int seed, int width, int height, string filepath, double offset) {
 
     // This generated only ONE image
     // The number in the save file is the seed of the image 
@@ -339,7 +339,7 @@ void generateNoiseWallpaper(int seed, int width, int height, string filepath, do
                     ((double)(r.rand() % 100)) / 100.0
                 );
             }
-            img->blurlayer(0, 5);
+            img->blurlayer(0, NOISE_BLUR);
         break;
     }
 
@@ -350,9 +350,9 @@ void generateNoiseWallpaper(int seed, int width, int height, string filepath, do
 
 }
 
-void generateNoiseWallpaperSequence (int seed, int width, int height, string folder) {
+void genNoiseWallpSequence (int seed, int width, int height, string folder) {
 
-    // The while loop to call the "generateNoiseWallpaper"
+    // The while loop to call the "genNoiseWallp"
     // is in this seperate function,
     // so images with a known seed can be more easyly recreated  
 
@@ -374,10 +374,10 @@ void generateNoiseWallpaperSequence (int seed, int width, int height, string fol
             filepath.append(to_string(seed+i));
             filepath.append(".bmp");
     
-            threads.emplace_back([&](){generateNoiseWallpaper(seed+i, width, height, filepath, 0.0);});
+            threads.emplace_back([&](){genNoiseWallp(seed+i, width, height, filepath, 0.0);});
 
             // This waiting is IMPORTANT otherwise the "filepath" arg is not
-            // received correctly in the "generateNoiseWallpaper" function
+            // received correctly in the "genNoiseWallp" function
             this_thread::sleep_for(sleepTime);
         }
 
@@ -419,10 +419,10 @@ void noiseAnimation(int seed, int width, int height, int startFrame, int endFram
             filepath.append(to_string(f+i));
             filepath.append(".bmp");
 
-            threads.emplace_back([&](){generateNoiseWallpaper(seed, width, height, filepath, offset);});
+            threads.emplace_back([&](){genNoiseWallp(seed, width, height, filepath, offset);});
 
             // This waiting is IMPORTANT otherwise the "filepath" arg is not
-            // received correctly in the "generateNoiseWallpaper" function
+            // received correctly in the "genNoiseWallp" function
             this_thread::sleep_for(sleepTime);
 
             offset += speed;
